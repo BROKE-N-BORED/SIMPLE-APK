@@ -233,6 +233,10 @@ def write_menu_entry(install_dir: str, launcher: str, home: str | None = None,
     icon = os.path.join(install_dir, "icons", "app-256.png")
     if not os.path.isfile(icon):
         icon = os.path.join(install_dir, "icons", "app-128.png")
+    if not os.path.isfile(icon):
+        # Fresh clones carry only app.svg (PNGs cannot ride the text-only
+        # GitHub push); an SVG icon still shows in the menu.
+        icon = os.path.join(install_dir, "icons", "app.svg")
     desktop_dir = os.path.join(home or home_dir(), ".local", "share",
                                "applications")
     os.makedirs(desktop_dir, exist_ok=True)
