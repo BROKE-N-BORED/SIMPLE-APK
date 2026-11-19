@@ -6,6 +6,7 @@ import functools
 import http.server
 import os
 import socketserver
+import sys
 import tempfile
 import threading
 import unittest
@@ -219,3 +220,37 @@ class ResumableDownloadTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RunQuietTests(unittest.TestCase):
+    """_run_quiet feeds stdin_text through communicate(). The old code
+    wrote the pipe and closed it by hand, and communicate() then
+    raised ValueError: I/O operation on closed file, which killed the
+    license step of First-Time Setup on a real PC (2026-11-18). These
+    tests fail on the old code and pass on the fix."""
+
+    def _run(self, code, **kwargs):
+        from apk_builder.core.environment import _run_quiet
+
+        return _run_quiet([sys.executable, "-c", code], **kwargs)
+
+    def test_stdin_text_reaches_a_fast_command(self):
+        result = self._run(
+            "import sys; print(sys.stdin.read().upper(), end='')",
+            stdin_text="yes\n")
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("YES", result.stdout)
+
+    def test_stdin_text_survives_a_slow_command(self):
+        # Two seconds forces the communicate() timeout-and-retry path
+        # with the input already handed over.
+        result = self._run(
+            "import sys, time; time.sleep(2); "
+            "print('read:' + sys.stdin.read(), end='')",
+            stdin_text="y\n", timeout=60)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("read:y", result.stdout)
+
+    def test_no_stdin_slow_command(self):
+        result = self._run("import time; time.sleep(2)", timeout=60)
+        self.assertEqual(result.returncode, 0)

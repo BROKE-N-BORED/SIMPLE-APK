@@ -24,7 +24,7 @@ from PySide6.QtWidgets import (
 
 from .. import __version__
 from ..core.logutil import build_debug_report, default_logs_dir
-from .helpers import open_folder, show_info
+from .helpers import make_top_level, open_folder, show_info
 
 log = logging.getLogger("apk_builder")
 
@@ -35,6 +35,7 @@ WINDOW_HEIGHT = 520
 class SettingsWindow(QWidget):
     def __init__(self, settings_manager, parent=None):
         super().__init__(parent)
+        make_top_level(self)
         self._settings_manager = settings_manager
         self.setWindowTitle("Settings")
         self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)

@@ -15,6 +15,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from .helpers import make_top_level
+
 WINDOW_WIDTH = 760
 WINDOW_HEIGHT = 520
 
@@ -104,6 +106,7 @@ ENTRIES: list[tuple[str, str]] = [
 class HelpWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        make_top_level(self)
         self.setWindowTitle("How to Use")
         self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
 

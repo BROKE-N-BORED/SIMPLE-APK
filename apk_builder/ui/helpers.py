@@ -67,6 +67,20 @@ class StatusLine(QWidget):
         self.label.setText(text)
 
 
+def make_top_level(widget) -> None:
+    """Make a secondary window a real window of its own.
+
+    A QWidget shown from the main window without the Window flag is
+    embedded inside it instead of getting its own frame, and without
+    WA_StyledBackground its stylesheet background never paints, so the
+    main window shows through it (seen on a real PC, 2026-11-18:
+    First-Time Setup painted over the main window). Every secondary
+    window calls this once, right after it is created.
+    """
+    widget.setWindowFlag(Qt.Window, True)
+    widget.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+
+
 def open_folder(path: str) -> bool:
     """Open a folder in the file manager. True when it launched."""
     if not os.path.isdir(path):

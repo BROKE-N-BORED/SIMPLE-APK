@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..core.errors import format_seconds
+from .helpers import make_top_level
 from .theme import FONT_LOG
 
 WINDOW_WIDTH = 760
@@ -29,6 +30,7 @@ WINDOW_HEIGHT = 480
 class LogWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        make_top_level(self)
         self.setWindowTitle("Build Log")
         self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self._started_at: float | None = None

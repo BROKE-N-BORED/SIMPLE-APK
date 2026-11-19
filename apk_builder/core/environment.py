@@ -340,14 +340,14 @@ def _run_quiet(args: list[str], env: dict | None = None,
     process = subprocess.Popen(
         args, env=env, stdin=subprocess.PIPE if stdin_text else subprocess.DEVNULL,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    if stdin_text:
-        assert process.stdin is not None
-        try:
-            process.stdin.write(stdin_text)
-            process.stdin.close()
-        except (BrokenPipeError, OSError):
-            pass
     started = _time.monotonic()
+    # The input goes through communicate(), never a hand write and
+    # close: closing the pipe by hand makes communicate() raise
+    # "I/O operation on closed file" (proven in a probe, and seen on a
+    # real PC on 2026-11-18, where the license step of First-Time
+    # Setup died with exactly that). After a timeout, communicate()
+    # already holds the input, so the retries pass none.
+    pending_input = stdin_text
     while True:
         if cancel is not None and cancel():
             process.kill()
@@ -357,9 +357,10 @@ def _run_quiet(args: list[str], env: dict | None = None,
                 pass
             raise SetupCancelled("Setup was cancelled.")
         try:
-            _out, _err = process.communicate(timeout=1)
+            _out, _err = process.communicate(input=pending_input, timeout=1)
             break
         except subprocess.TimeoutExpired:
+            pending_input = None
             if _time.monotonic() - started > timeout:
                 process.kill()
                 try:

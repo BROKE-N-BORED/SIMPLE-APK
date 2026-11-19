@@ -3,7 +3,7 @@
 Turn Android app source into an installable app file. Pick a zip file
 or a folder, press Build, get an APK. No terminal needed.
 
-Version 0.1. Python 3.10+, PySide6, standard library only. Hard $0.
+Version 0.2. Python 3.10+, PySide6, standard library only. Hard $0.
 
 ## How to use it
 
@@ -63,29 +63,36 @@ Note: the release repo is https://github.com/BROKE-N-BORED/SIMPLE-APK
 checks find nothing and no update is ever offered. The repo is baked
 in as `REPO` in `apk_builder/core/updates.py`.
 
-## Honest status (v0.1)
+## Honest status (v0.2)
 
-Everything in v0.1 is verified except the one thing this sandbox
-cannot do: run a real Gradle build. The Gradle daemon fails in this
-sandbox ("Could not receive a message from the daemon", proven three
-times with the NEO project). It is a sandbox problem, not an app
-problem, and no workaround was attempted.
+v0.1 shipped on 2026-11-18 and ran on a real Mint PC the same night.
+Two defects showed there that the sandbox checks could not see, and
+v0.2 fixes both:
 
-Verified here: safe unzip and project detection against the real NEO
-source zip, error paths (bad zip, non-Android folder, missing
-wrapper), APK finding and copying, environment detection, the full
-test suite (77 tests: 68 engine, 9 GUI), the GUI offscreen with
-screenshots, the whole pick-to-done flow through the real UI with a
-stand-in build script, the installer in a clean home (command line
-and GUI), and the release zip extracted and installed from scratch.
+- The secondary windows (First-Time Setup, Build Log, Settings, How
+  to Use) painted inside the main window with no background, so the
+  main window showed through them. They are real windows now.
+- First-Time Setup died at the license step with a raw "I/O
+  operation on closed file" error, so the build tools never finished
+  installing. The faulty pipe handling is rewritten, and unexpected
+  errors now reach the user in plain words, never as raw text.
 
-**The first real Gradle build must happen on a Mint PC.** That is the
-one check left, and it is the check that matters most. Build the NEO
-project first: it is a complete project with its wrapper included.
+Also in v0.2: installing from a fresh clone now falls back to the SVG
+icon when the PNG icons are not there.
+
+Verified here: the full test suite (84 tests; 7 new ones guard
+exactly these defects), a probe that reproduced the closed-file
+error on the old code and passes on the fix, and a screen check of
+First-Time Setup open over the main window. The Gradle daemon still
+cannot run in this sandbox (proven three times with the NEO
+project), so two checks still wait for a real PC: First-Time Setup
+running to completion, and the first real Gradle build. Build the
+NEO project first: it is a complete project with its wrapper
+included.
 
 ## Building the release zip
 
-    python3 build_zip.py [--version 0.1] [--out dist/]
+    python3 build_zip.py [--version 0.2] [--out dist/]
 
 Writes `simple-apk-linux-<version>.zip` plus its `.sha256` sidecar,
 and self-checks the stored file modes. Publish the zip and the sidecar

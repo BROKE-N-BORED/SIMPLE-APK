@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 
 from .. import __version__
 from ..core import updates
-from ..core.errors import format_bytes
+from ..core.errors import describe as describe_error, format_bytes
 from ..core.updates import UpdateCancelled, UpdateError
 
 log = logging.getLogger("apk_builder")
@@ -76,7 +76,7 @@ class UpdateApplyWorker(QObject):
         except Exception as exc:  # noqa: BLE001 - any failure is a message
             log.warning("Update failed unexpectedly: %s: %s",
                         type(exc).__name__, exc)
-            self.failed.emit(f"Something went wrong: {exc}")
+            self.failed.emit(describe_error(exc))
 
 
 class UpdateDialog(QDialog):
@@ -86,6 +86,7 @@ class UpdateDialog(QDialog):
 
     def __init__(self, info: dict, installed: bool, parent=None):
         super().__init__(parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.update_requested = False
         self._page_url = info.get("page_url") or ""
         self.setWindowTitle("Update available")
@@ -141,6 +142,7 @@ class UpdateProgressDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.setWindowTitle("Updating")
         self.setModal(True)
         self.setMinimumWidth(420)

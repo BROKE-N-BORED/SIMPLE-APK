@@ -2,5 +2,5 @@
 
 Pick a zip or a folder, press Build, get an APK. No terminal needed.
 """
-__version__ = "0.1"
+__version__ = "0.2"
 __all__ = ["__version__"]

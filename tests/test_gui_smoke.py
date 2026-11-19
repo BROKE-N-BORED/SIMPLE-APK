@@ -279,6 +279,38 @@ class GuiSmokeTests(unittest.TestCase):
             os.path.join(VERIFY_DIR, "help-window.png")))
         help_window.close()
 
+    def test_child_windows_are_real_windows(self):
+        """Each secondary window is a real top-level window with a
+        painted background. Without the Window flag a QWidget shown
+        from the main window embeds inside it, and without
+        WA_StyledBackground its background never paints, so the main
+        window shows through (seen on a real PC, 2026-11-18:
+        First-Time Setup painted over the main window)."""
+        from PySide6.QtCore import Qt
+
+        from apk_builder.ui.help_window import HelpWindow
+        from apk_builder.ui.log_window import LogWindow
+        from apk_builder.ui.settings_window import SettingsWindow
+        from apk_builder.ui.setup_window import SetupWindow
+
+        windows = [
+            LogWindow(self.window),
+            SetupWindow(self.settings, self.window),
+            SettingsWindow(self.settings, self.window),
+            HelpWindow(self.window),
+        ]
+        try:
+            for window in windows:
+                self.assertTrue(window.isWindow(), type(window).__name__)
+                self.assertTrue(
+                    window.testAttribute(
+                        Qt.WidgetAttribute.WA_StyledBackground),
+                    type(window).__name__)
+        finally:
+            for window in windows:
+                window.close()
+            _pump(0.2)
+
     def test_no_em_dash_or_ampersand_in_visible_text(self):
         """U33 and U11 guards: walk every visible string the main window
         and the help index can show and refuse em-dashes and bare &."""

@@ -75,4 +75,9 @@ def describe(exc: Exception) -> str:
     if isinstance(exc, TimeoutError):
         return ("That took too long and timed out. Check the internet "
                 "connection and try again.")
-    return f"Something went wrong: {exc}"
+    # Never leak the raw exception text (U29): it is jargon to a user.
+    # A raw "I/O operation on closed file" reached a status line on
+    # 2026-11-18. The workers log the technical detail before calling
+    # this, so nothing is lost.
+    return ("Something went wrong. Try again. If it keeps happening, "
+            "the details are in the log (Settings, Open Logs).")

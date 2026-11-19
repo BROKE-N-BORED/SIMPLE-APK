@@ -25,7 +25,7 @@ from PySide6.QtWidgets import (
 
 from ..core import environment as env_core
 from ..core.errors import format_bytes
-from .helpers import StatusLine
+from .helpers import StatusLine, make_top_level
 from .workers import EnvCheckWorker, JavaInstallWorker, SetupWorker
 
 log = logging.getLogger("apk_builder")
@@ -42,6 +42,7 @@ class SetupWindow(QWidget):
 
     def __init__(self, settings_manager, parent=None):
         super().__init__(parent)
+        make_top_level(self)
         self._settings_manager = settings_manager
         self._env_status = None
         self._thread: QThread | None = None
