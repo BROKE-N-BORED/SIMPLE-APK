@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+dist/
+verify/
+.simple-apk-downloads/
+.env
